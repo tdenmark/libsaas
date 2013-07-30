@@ -11,7 +11,7 @@ from . import resources
 class Zendesk(base.Resource):
     """
     """
-    def __init__(self, subdomain, username, password):
+    def __init__(self, subdomain, username, password=None, token=None):
         """
         Create a Zendesk service.
 
@@ -23,14 +23,23 @@ class Zendesk(base.Resource):
         :var username: The email of the authenticated agent.
         :vartype username: str
 
-        :var password: The password of the authenticated agent.
+        :var password: The password of the authenticated agent, leave this as
+            `None` when using token auth.
         :vartype password: str
+
+        :var token: Only used with Zendesk token auth, leave password as
+            `None` when using this token auth.
+        :vartype token: str
         """
         tmpl = '{0}.zendesk.com/api/v2'
         self.apiroot = http.quote_any(tmpl.format(port.to_u(subdomain)))
         self.apiroot = 'https://' + self.apiroot
 
-        self.add_filter(auth.BasicAuth(username, password))
+        if token is None:
+            self.add_filter(auth.BasicAuth(username, password))
+        else:
+            self.add_filter(auth.BasicAuth(username + '/token', token))
+
         self.add_filter(self.use_json)
 
     def get_url(self):

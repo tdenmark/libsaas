@@ -27,6 +27,16 @@ class ZendeskTestCase(unittest.TestCase):
         if headers:
             self.assertEqual(self.executor.request.headers, headers)
 
+    def test_basic_auth(self):
+        service = zendesk.Zendesk('mydomain', 'myuser', 'mypass')
+        self.assertEqual(service.filters[0].username, 'myuser')
+        self.assertEqual(service.filters[0].password, 'mypass')
+
+    def test_token_auth(self):
+        service = zendesk.Zendesk('mydomain', 'myuser', token='mytoken')
+        self.assertEqual(service.filters[0].username, 'myuser/token')
+        self.assertEqual(service.filters[0].password, 'mytoken')
+
     def test_tickets(self):
         self.service.tickets().get(page=3)
         self.expect('GET', '/tickets.json', {'page': 3})
